@@ -1,1 +1,8 @@
-# riot-league-of-legends-api-service
+```
+npm install
+npm run dev
+```
+
+```
+open http://localhost:3000
+```
