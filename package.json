@@ -1,0 +1,12 @@
+{
+  "name": "riot-service",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.5"
+  }
+}
