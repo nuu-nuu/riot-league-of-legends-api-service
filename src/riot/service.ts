@@ -5,7 +5,7 @@
 // so tests can construct an isolated instance with its own config and cache
 // state instead of sharing module-level singletons across test cases.
 
-import type { AppConfig } from "../config.js";
+import { clusterFor, loadConfig, type AppConfig } from "../config.js";
 import { riot, RiotApiError } from "./client.js";
 import { TtlCache } from "./cache.js";
 import type {
@@ -17,9 +17,12 @@ import type {
   LiveGameStatus,
   RecentMatchSummary,
 } from "../types.js";
+import { platform } from "node:os";
 
-export function createRiotService(config: Pick<AppConfig, "key" | "name" | "tag" | "platform" | "cluster">) {
-  const { key, name, tag, platform, cluster } = config;
+export function createRiotService(tag: string, region: string, gameName: string) {
+  const cluster = clusterFor(region);
+  const CONFIG = loadConfig();
+  const RIOT_KEY = CONFIG.key;
 
   const puuidCache = new TtlCache<string>();
   const rankCache = new TtlCache<RankEntry[]>();
@@ -29,8 +32,8 @@ export function createRiotService(config: Pick<AppConfig, "key" | "name" | "tag"
     const cached = puuidCache.get();
     if (cached) return cached;
     const acc = await riot<RiotAccount>(
-      `https://${cluster}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`,
-      key,
+      `https://${cluster}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(gameName)}/${encodeURIComponent(tag)}`,
+      RIOT_KEY,
     );
     puuidCache.set(acc.puuid);
     return acc.puuid;
@@ -42,7 +45,7 @@ export function createRiotService(config: Pick<AppConfig, "key" | "name" | "tag"
     const puuid = await getPuuid();
     const data = await riot<RankEntry[]>(
       `https://${platform}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}`,
-      key,
+      RIOT_KEY,
     );
     rankCache.set(data);
     return data;
@@ -54,7 +57,7 @@ export function createRiotService(config: Pick<AppConfig, "key" | "name" | "tag"
     const puuid = await getPuuid();
     const data = await riot<MasteryEntry[]>(
       `https://${platform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=4`,
-      key,
+      RIOT_KEY,
     );
     masteryCache.set(data);
     return data;
@@ -66,7 +69,7 @@ export function createRiotService(config: Pick<AppConfig, "key" | "name" | "tag"
     try {
       const game = await riot<SpectatorGame>(
         `https://${platform}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${puuid}`,
-        key,
+        RIOT_KEY,
       );
       const me = game.participants.find((p) => p.puuid === puuid);
       return {
@@ -85,12 +88,12 @@ export function createRiotService(config: Pick<AppConfig, "key" | "name" | "tag"
     const puuid = await getPuuid();
     const ids = await riot<string[]>(
       `https://${cluster}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?count=1`,
-      key,
+      RIOT_KEY,
     );
     if (!ids.length) return null;
     const match = await riot<Match>(
       `https://${cluster}.api.riotgames.com/lol/match/v5/matches/${ids[0]}`,
-      key,
+      RIOT_KEY,
     );
     const me = match.info.participants.find((p) => p.puuid === puuid);
     if (!me) return null;
