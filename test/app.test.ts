@@ -6,9 +6,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const BASE_ENV = {
   RIOT_API_KEY: "test-api-key",
-  RIOT_NAME: "Faker",
-  RIOT_TAG: "KR1",
-  RIOT_REGION: "kr",
   ALLOWED_ORIGIN: "*",
   PORT: "4322",
 };
@@ -88,14 +85,6 @@ describe("GET /api/riot — missing server config", () => {
     const body = await res.json();
     expect(body.ok).toBe(false);
     expect(body.error).toMatch(/RIOT_API_KEY/);
-  });
-
-  it("500s with a clear message when RIOT_NAME is unset", async () => {
-    const app = await loadApp({ RIOT_NAME: undefined });
-    const res = await app.request("/api/riot?region=kr&gameName=Faker&tag=KR1");
-    expect(res.status).toBe(500);
-    const body = await res.json();
-    expect(body.error).toMatch(/RIOT_NAME|RIOT_TAG/);
   });
 });
 
