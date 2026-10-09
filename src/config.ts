@@ -12,14 +12,10 @@ export const REGIONS = {
   europe: ["euw1", "eun1", "tr1", "ru"],
 } as const;
 
-export const ALL_REGIONS = Object.values(REGIONS).flat();
+export const ALL_REGIONS: string[] = Object.values(REGIONS).flat();
 
 export interface AppConfig {
   key: string | undefined;
-  name: string;
-  tag: string;
-  platform: string;
-  cluster: "americas" | "asia" | "europe";
   port: number;
   allowedOrigins: string[];
 }
@@ -34,9 +30,6 @@ export function clusterFor(platform: string): "americas" | "asia" | "europe" {
 
 export function loadConfig(): AppConfig {
   const key = process.env.RIOT_API_KEY;
-  const name = (process.env.RIOT_NAME ?? "").trim();
-  const tag = (process.env.RIOT_TAG ?? "").trim().replace(/^#/, "");
-  const platform = (process.env.RIOT_REGION ?? "euw1").toLowerCase();
   const port = Number(process.env.PORT ?? 4322);
   const allowedOrigins = (process.env.ALLOWED_ORIGIN ?? "*")
     .split(",")
@@ -44,10 +37,6 @@ export function loadConfig(): AppConfig {
 
   return {
     key,
-    name,
-    tag,
-    platform,
-    cluster: clusterFor(platform),
     port,
     allowedOrigins,
   };
