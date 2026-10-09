@@ -7,13 +7,15 @@
 
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { loadConfig } from "./config.js";
+import { ALL_REGIONS, loadConfig } from "./config.js";
 import { createRiotService } from "./riot/service.js";
 import { RiotApiError } from "./riot/client.js";
 
 export function createApp() {
   const config = loadConfig();
-  const riotService = createRiotService(config);
+  // to rewrite with query make it so the service gets created later and does not load whole config anymore
+  // but uses query strings
+  let riotService : any;
 
   const app = new Hono();
 
@@ -35,17 +37,18 @@ export function createApp() {
     const gameName = c.req.query("gameName");
     const tag = c.req.query("tag");
 
-    if (!region) {
-      return c.json({ ok: false, error: "User Region is required" }, 400);
-    }
+    if (!region) return c.json({ ok: false, error: "User Region is required" }, 400);
 
-    if (!gameName) {
-      return c.json({ ok: false, error: "User Game Name is required" }, 400);
-    }
 
-    if (!tag) {
-      return c.json({ ok: false, error: "User Tag is required" }, 400);
-    }
+    if (!gameName) return c.json({ ok: false, error: "User Game Name is required" }, 400);
+
+
+    if (!tag) return c.json({ ok: false, error: "User Tag is required" }, 400);
+
+
+    if (!ALL_REGIONS.includes(region)) return c.json({ ok: false, error: "Invalid region" }, 400);
+
+    riotService = createRiotService(tag, region, gameName);
 
     await next();
   });
@@ -56,9 +59,12 @@ export function createApp() {
   // part is optional; omitting it (or any unrecognized value) returns rank data.
   app.get("/api/riot", async (c) => {
     const part = c.req.query("part");
+    const region = c.req.query("region");
+    const gameName = c.req.query("gameName");
+    const tag = c.req.query("tag");
+
     try {
       if (!config.key) throw new Error("RIOT_API_KEY missing in .env");
-      if (!config.name || !config.tag) throw new Error("RIOT_NAME or RIOT_TAG missing in .env");
 
       let data: unknown;
       if (part === "mastery") data = await riotService.getMastery();
