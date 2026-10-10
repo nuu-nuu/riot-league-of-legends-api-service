@@ -1,29 +1,37 @@
 ---
-name: Feature / Refactor
-about: Propose a change that adds, removes, or reworks functionality
-title: ''
+name: Feature request / refactor
+about: Suggest a new feature, improvement, or refactor for the service
+title: 'feat: '
 labels: enhancement
 assignees: ''
 ---
 
-**Title:** <!-- short, action-oriented, e.g. "Replace X with Y" -->
+## ✨ Feature title
+<!-- Example: "feat: add API versioning for Riot endpoints" -->
 
-**Description:**
+## 📝 Summary
+Describe the current limitation and why the change should happen.
 
-<!-- What's the current behavior/limitation, and why does it need to change?
-     1-3 sentences of context is enough. -->
+## 📦 Versioning impact
+- App version target: `x.y.z`
+- API version impact: `v1` / `v2` / none
+- Breaking change: `Yes` / `No`
 
-**Goal:** <!-- what the end state looks like, ideally with a concrete example
-     (sample request, config, code snippet, etc.) -->
+## 🎯 Expected behavior
+Describe the desired end state. Include a sample request or code snippet if helpful.
 
-<!-- example usage of the new behavior, if applicable -->
+```typescript
+// Example usage or request body
+```
 
-**Scope:**
-- <!-- concrete, checkable change #1 -->
-- <!-- concrete, checkable change #2 -->
-- <!-- concrete, checkable change #3 -->
+## 📋 Scope and tasks
+- [ ] Task 1
+- [ ] Task 2
+- [ ] Task 3
 
-**Out of scope:** <!-- explicitly call out related things this issue does NOT cover,
-     to prevent scope creep and set expectations for reviewers -->
+## 🚫 Out of scope
+- Item not included in this change
+- Another explicit exclusion
 
-**Breaking change:** <!-- yes/no — if yes, note what existing users/configs need to change -->
+## ⚠️ Notes for compatibility
+If this changes routes, env vars, or response structures, explain exactly what existing users must update.

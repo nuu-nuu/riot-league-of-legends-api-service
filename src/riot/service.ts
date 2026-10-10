@@ -17,7 +17,6 @@ import type {
   LiveGameStatus,
   RecentMatchSummary,
 } from "../types.js";
-import { platform } from "node:os";
 
 export function createRiotService(tag: string, region: string, gameName: string) {
   const cluster = clusterFor(region);

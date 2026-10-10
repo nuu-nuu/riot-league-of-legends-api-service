@@ -1,4 +1,15 @@
-# dev
+# Build output
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.production
+
+# Yarn & Editors
 .yarn/
 !.yarn/releases
 .vscode/*
@@ -8,14 +19,7 @@
 .idea/usage.statistics.xml
 .idea/shelf
 
-# deps
-node_modules/
-
-# env
-.env
-.env.production
-
-# logs
+# Logs
 logs/
 *.log
 npm-debug.log*
@@ -24,5 +28,5 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# misc
+# OS / Misc
 .DS_Store

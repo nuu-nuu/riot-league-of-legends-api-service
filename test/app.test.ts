@@ -44,10 +44,10 @@ describe("GET /health", () => {
   });
 });
 
-describe("GET /api/riot — param validation", () => {
+describe("GET /api/v1/riot — param validation", () => {
   it("400s when region is missing", async () => {
     const app = await loadApp();
-    const res = await app.request("/api/riot?gameName=Faker&tag=KR1");
+    const res = await app.request("/api/v1/riot?gameName=Faker&tag=KR1");
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body.ok).toBe(false);
@@ -56,7 +56,7 @@ describe("GET /api/riot — param validation", () => {
 
   it("400s when gameName is missing", async () => {
     const app = await loadApp();
-    const res = await app.request("/api/riot?region=kr&tag=KR1");
+    const res = await app.request("/api/v1/riot?region=kr&tag=KR1");
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body.error).toMatch(/game name/i);
@@ -64,7 +64,7 @@ describe("GET /api/riot — param validation", () => {
 
   it("400s when tag is missing", async () => {
     const app = await loadApp();
-    const res = await app.request("/api/riot?region=kr&gameName=Faker");
+    const res = await app.request("/api/v1/riot?region=kr&gameName=Faker");
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body.error).toMatch(/tag/i);
@@ -72,15 +72,15 @@ describe("GET /api/riot — param validation", () => {
 
   it("400s when all three are missing", async () => {
     const app = await loadApp();
-    const res = await app.request("/api/riot");
+    const res = await app.request("/api/v1/riot");
     expect(res.status).toBe(400);
   });
 });
 
-describe("GET /api/riot — missing server config", () => {
+describe("GET /api/v1/riot — missing server config", () => {
   it("500s with a clear message when RIOT_API_KEY is unset", async () => {
     const app = await loadApp({ RIOT_API_KEY: undefined });
-    const res = await app.request("/api/riot?region=kr&gameName=Faker&tag=KR1");
+    const res = await app.request("/api/v1/riot?region=kr&gameName=Faker&tag=KR1");
     expect(res.status).toBe(500);
     const body = await res.json();
     expect(body.ok).toBe(false);
@@ -88,7 +88,7 @@ describe("GET /api/riot — missing server config", () => {
   });
 });
 
-describe("GET /api/riot — happy paths (fetch mocked)", () => {
+describe("GET /api/v1/riot — happy paths (fetch mocked)", () => {
   let fetchMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
@@ -117,7 +117,7 @@ describe("GET /api/riot — happy paths (fetch mocked)", () => {
       );
 
     const app = await loadApp();
-    const res = await app.request("/api/riot?region=kr&gameName=Faker&tag=KR1");
+    const res = await app.request("/api/v1/riot?region=kr&gameName=Faker&tag=KR1");
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.ok).toBe(true);
@@ -133,7 +133,7 @@ describe("GET /api/riot — happy paths (fetch mocked)", () => {
       );
 
     const app = await loadApp();
-    const res = await app.request("/api/riot?region=kr&gameName=Faker&tag=KR1&part=rank");
+    const res = await app.request("/api/v1/riot?region=kr&gameName=Faker&tag=KR1&part=rank");
     const body = await res.json();
     expect(body.data[0].tier).toBe("GOLD");
   });
@@ -144,7 +144,7 @@ describe("GET /api/riot — happy paths (fetch mocked)", () => {
       .mockResolvedValueOnce(jsonResponse([{ championId: 7, championLevel: 7, championPoints: 999999 }]));
 
     const app = await loadApp();
-    const res = await app.request("/api/riot?region=kr&gameName=Faker&tag=KR1&part=mastery");
+    const res = await app.request("/api/v1/riot?region=kr&gameName=Faker&tag=KR1&part=mastery");
     const body = await res.json();
     expect(body.ok).toBe(true);
     expect(body.data[0].championId).toBe(7);
@@ -160,7 +160,7 @@ describe("GET /api/riot — happy paths (fetch mocked)", () => {
     );
 
     const app = await loadApp();
-    const res = await app.request("/api/riot?region=kr&gameName=Faker&tag=KR1&part=live");
+    const res = await app.request("/api/v1/riot?region=kr&gameName=Faker&tag=KR1&part=live");
     const body = await res.json();
     expect(body.data).toEqual({
       inGame: true,
@@ -176,7 +176,7 @@ describe("GET /api/riot — happy paths (fetch mocked)", () => {
       .mockResolvedValueOnce(jsonResponse({ status: { message: "Not Found" } }, 404));
 
     const app = await loadApp();
-    const res = await app.request("/api/riot?region=kr&gameName=Faker&tag=KR1&part=live");
+    const res = await app.request("/api/v1/riot?region=kr&gameName=Faker&tag=KR1&part=live");
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.data).toEqual({ inGame: false });
@@ -199,7 +199,7 @@ describe("GET /api/riot — happy paths (fetch mocked)", () => {
       );
 
     const app = await loadApp();
-    const res = await app.request("/api/riot?region=kr&gameName=Faker&tag=KR1&part=recent");
+    const res = await app.request("/api/v1/riot?region=kr&gameName=Faker&tag=KR1&part=recent");
     const body = await res.json();
     expect(body.data).toMatchObject({ championId: 1, kills: 10, deaths: 2, assists: 5, win: true });
   });
@@ -208,7 +208,7 @@ describe("GET /api/riot — happy paths (fetch mocked)", () => {
     fetchMock.mockResolvedValueOnce(jsonResponse({ puuid: PUUID })).mockResolvedValueOnce(jsonResponse([]));
 
     const app = await loadApp();
-    const res = await app.request("/api/riot?region=kr&gameName=Faker&tag=KR1&part=recent");
+    const res = await app.request("/api/v1/riot?region=kr&gameName=Faker&tag=KR1&part=recent");
     const body = await res.json();
     expect(body.data).toBeNull();
   });
@@ -230,7 +230,7 @@ describe("GET /api/riot — happy paths (fetch mocked)", () => {
       .mockResolvedValueOnce(jsonResponse({ status: { message: "Not Found" } }, 404));
 
     const app = await loadApp();
-    const res = await app.request("/api/riot?region=kr&gameName=Faker&tag=KR1&part=all");
+    const res = await app.request("/api/v1/riot?region=kr&gameName=Faker&tag=KR1&part=all");
     const body = await res.json();
     expect(body.ok).toBe(true);
     expect(body.data.rank[0].tier).toBe("IRON");
@@ -246,13 +246,13 @@ describe("GET /api/riot — happy paths (fetch mocked)", () => {
       );
 
     const app = await loadApp();
-    const res = await app.request("/api/riot?region=kr&gameName=Faker&tag=KR1&part=bogus");
+    const res = await app.request("/api/v1/riot?region=kr&gameName=Faker&tag=KR1&part=bogus");
     const body = await res.json();
     expect(body.data[0].tier).toBe("BRONZE");
   });
 });
 
-describe("GET /api/riot — Riot API error propagation", () => {
+describe("GET /api/v1/riot — Riot API error propagation", () => {
   let fetchMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
@@ -268,7 +268,7 @@ describe("GET /api/riot — Riot API error propagation", () => {
     fetchMock.mockResolvedValueOnce(jsonResponse({ status: { message: "Not Found" } }, 404));
 
     const app = await loadApp();
-    const res = await app.request("/api/riot?region=kr&gameName=NoSuchSummoner&tag=XX1");
+    const res = await app.request("/api/v1/riot?region=kr&gameName=NoSuchSummoner&tag=XX1");
     expect(res.status).toBe(404);
     const body = await res.json();
     expect(body.ok).toBe(false);
@@ -282,7 +282,7 @@ describe("GET /api/riot — Riot API error propagation", () => {
     });
 
     const app = await loadApp();
-    const res = await app.request("/api/riot?region=kr&gameName=Faker&tag=KR1");
+    const res = await app.request("/api/v1/riot?region=kr&gameName=Faker&tag=KR1");
     expect(res.status).toBe(504);
     const body = await res.json();
     expect(body.error).toMatch(/timed out/i);
@@ -296,11 +296,11 @@ describe("GET /api/riot — Riot API error propagation", () => {
       );
 
     const app = await loadApp();
-    const res1 = await app.request("/api/riot?region=kr&gameName=Faker&tag=KR1&part=rank");
+    const res1 = await app.request("/api/v1/riot?region=kr&gameName=Faker&tag=KR1&part=rank");
     expect((await res1.json()).data[0].tier).toBe("DIAMOND");
     expect(fetchMock).toHaveBeenCalledTimes(2);
 
-    const res2 = await app.request("/api/riot?region=kr&gameName=Faker&tag=KR1&part=rank");
+    const res2 = await app.request("/api/v1/riot?region=kr&gameName=Faker&tag=KR1&part=rank");
     expect((await res2.json()).data[0].tier).toBe("DIAMOND");
     expect(fetchMock).toHaveBeenCalledTimes(2); // cache hit, no new fetch calls
   });
@@ -312,8 +312,8 @@ describe("GET /api/riot — Riot API error propagation", () => {
       .mockResolvedValueOnce(jsonResponse({ status: {} }, 404)); // puuid cached, live re-fetched
 
     const app = await loadApp();
-    await app.request("/api/riot?region=kr&gameName=Faker&tag=KR1&part=live");
-    await app.request("/api/riot?region=kr&gameName=Faker&tag=KR1&part=live");
+    await app.request("/api/v1/riot?region=kr&gameName=Faker&tag=KR1&part=live");
+    await app.request("/api/v1/riot?region=kr&gameName=Faker&tag=KR1&part=live");
     // 1 puuid fetch (cached after) + 2 live fetches = 3 total
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
