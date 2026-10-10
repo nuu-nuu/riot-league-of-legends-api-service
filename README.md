@@ -1,5 +1,7 @@
 # Riot League of Legends API Service
 
+[![CI](https://github.com/nuu-nuu/riot-league-of-legends-api-service/actions/workflows/ci.yml/badge.svg)](https://github.com/nuu-nuu/riot-league-of-legends-api-service/actions/workflows/ci.yml)
+
 A lightweight TypeScript API server that wraps Riot Games League of Legends endpoints and exposes a cleaner backend-friendly interface for browser or app clients.
 
 This project is designed to be cloned and run as your own self-hosted service. The server reads a Riot API key from environment variables and proxies requests server-side instead of exposing the key directly to the browser.
