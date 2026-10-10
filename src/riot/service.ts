@@ -44,7 +44,7 @@ export function createRiotService(tag: string, region: string, gameName: string)
     if (cached) return cached;
     const puuid = await getPuuid();
     const data = await riot<RankEntry[]>(
-      `https://${cluster}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}`,
+      `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}`,
       RIOT_KEY,
     );
     rankCache.set(data);
@@ -56,7 +56,7 @@ export function createRiotService(tag: string, region: string, gameName: string)
     if (cached) return cached;
     const puuid = await getPuuid();
     const data = await riot<MasteryEntry[]>(
-      `https://${cluster}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=4`,
+      `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=4`,
       RIOT_KEY,
     );
     masteryCache.set(data);
