@@ -1,5 +1,6 @@
 {
   "name": "Riot Games League of Legends API Service",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
