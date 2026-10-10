@@ -13,8 +13,7 @@ import { RiotApiError } from "./riot/client.js";
 
 export function createApp() {
   const config = loadConfig();
-  // to rewrite with query make it so the service gets created later and does not load whole config anymore
-  // but uses query strings
+
   let riotService : any;
 
   const app = new Hono();
