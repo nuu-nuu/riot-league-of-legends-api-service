@@ -1,25 +1,33 @@
 ---
 name: Bug report
-about: Create a report to help us improve the project
+about: Report a bug in the Riot API service
 title: 'bug: '
 labels: bug
 assignees: ''
 ---
 
-## 🐛 Bug Description
-A clear and concise description of what the bug is.
+## 🐛 Bug summary
+A clear and concise description of the problem.
 
-## 🔄 Steps to Reproduce
-Steps to reproduce the behavior:
+## 📦 Version info
+- App version: `x.y.z`
+- API version: `v1` / `v2` / not applicable
+- Environment: `development` / `production`
+
+## 🔄 Steps to reproduce
 1. Call endpoint `...`
 2. Pass parameter `...`
 3. See error
 
-## 🎯 Expected Behavior
-A clear and concise description of what you expected to happen.
+## ✅ Expected behavior
+A clear description of what you expected to happen.
 
-## 📸 Screenshots / Logs
-If applicable, add screenshots or terminal output/logs to help explain your problem.
+## ❌ Actual behavior
+What happened instead.
+
+## 📸 Screenshots / logs
+If applicable, add screenshots or terminal output/logs to help explain the issue.
 
 ```text
-// Paste relevant error logs here
+Paste relevant logs, request/response output, or stack traces here
+```
