@@ -59,9 +59,6 @@ export function createApp() {
   // part is optional; omitting it (or any unrecognized value) returns rank data.
   app.get("/api/riot", async (c) => {
     const part = c.req.query("part");
-    const region = c.req.query("region");
-    const gameName = c.req.query("gameName");
-    const tag = c.req.query("tag");
 
     try {
       if (!config.key) throw new Error("RIOT_API_KEY missing in .env");
