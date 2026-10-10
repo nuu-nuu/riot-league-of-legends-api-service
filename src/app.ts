@@ -3,7 +3,7 @@
 // in tests via app.request(...) without starting a real server.
 //
 // Bring your own RIOT_API_KEY — this process is the only thing that
-// ever touches it; nothing is exposed to the client beyond /api/riot.
+// ever touches it; nothing is exposed to the client beyond /api/v1/riot.
 
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -14,9 +14,32 @@ import { RiotApiError } from "./riot/client.js";
 export function createApp() {
   const config = loadConfig();
 
-  let riotService : any;
+  const riotServices = new Map<string, ReturnType<typeof createRiotService>>();
+  let riotService: ReturnType<typeof createRiotService> | undefined;
 
   const app = new Hono();
+
+  const riotMiddleware = async (c: any, next: () => Promise<void>) => {
+    const region = c.req.query("region");
+    const gameName = c.req.query("gameName");
+    const tag = c.req.query("tag");
+
+    if (!region) return c.json({ ok: false, error: "User Region is required" }, 400);
+
+    if (!gameName) return c.json({ ok: false, error: "User Game Name is required" }, 400);
+
+    if (!tag) return c.json({ ok: false, error: "User Tag is required" }, 400);
+
+    if (!ALL_REGIONS.includes(region)) return c.json({ ok: false, error: "Invalid region" }, 400);
+
+    const playerKey = `${region}:${gameName}:${tag}`;
+    if (!riotServices.has(playerKey)) {
+      riotServices.set(playerKey, createRiotService(tag, region, gameName));
+    }
+    riotService = riotServices.get(playerKey);
+
+    await next();
+  };
 
   app.use(
     "/api/riot",
@@ -31,49 +54,44 @@ export function createApp() {
     }),
   );
 
-  app.use("/api/riot", async (c, next) => {
-    const region = c.req.query("region");
-    const gameName = c.req.query("gameName");
-    const tag = c.req.query("tag");
+  app.use(
+    "/api/v1/riot",
+    cors({
+      origin: (origin) => {
+        if (config.allowedOrigins.includes("*")) return "*";
+        if (origin && config.allowedOrigins.includes(origin)) return origin;
+        return null;
+      },
+      allowMethods: ["GET", "OPTIONS"],
+      allowHeaders: ["Content-Type", "Authorization"],
+    }),
+  );
 
-    if (!region) return c.json({ ok: false, error: "User Region is required" }, 400);
-
-
-    if (!gameName) return c.json({ ok: false, error: "User Game Name is required" }, 400);
-
-
-    if (!tag) return c.json({ ok: false, error: "User Tag is required" }, 400);
-
-
-    if (!ALL_REGIONS.includes(region)) return c.json({ ok: false, error: "Invalid region" }, 400);
-
-    riotService = createRiotService(tag, region, gameName);
-
-    await next();
-  });
+  app.use("/api/riot", riotMiddleware);
+  app.use("/api/v1/riot", riotMiddleware);
 
   app.get("/health", (c) => c.json({ ok: true, uptime: process.uptime() }));
 
-  // GET /api/riot?part=<rank|mastery|live|recent|all>
+  // GET /api/v1/riot?part=<rank|mastery|live|recent|all>
   // part is optional; omitting it (or any unrecognized value) returns rank data.
-  app.get("/api/riot", async (c) => {
+  app.get("/api/v1/riot", async (c) => {
     const part = c.req.query("part");
 
     try {
       if (!config.key) throw new Error("RIOT_API_KEY missing in .env");
 
       let data: unknown;
-      if (part === "mastery") data = await riotService.getMastery();
-      else if (part === "live") data = await riotService.getLive();
-      else if (part === "recent") data = await riotService.getRecentKda();
+      if (part === "mastery") data = await riotService!.getMastery();
+      else if (part === "live") data = await riotService!.getLive();
+      else if (part === "recent") data = await riotService!.getRecentKda();
       else if (part === "all") {
         const [rank, mastery, live] = await Promise.all([
-          riotService.getRank(),
-          riotService.getMastery(),
-          riotService.getLive(),
+          riotService!.getRank(),
+          riotService!.getMastery(),
+          riotService!.getLive(),
         ]);
         data = { rank, mastery, live };
-      } else data = await riotService.getRank();
+      } else data = await riotService!.getRank();
 
       return c.json({ ok: true, data });
     } catch (e) {
@@ -86,6 +104,11 @@ export function createApp() {
         500,
       );
     }
+  });
+
+  app.get("/api/riot", (c) => {
+    const query = c.req.queryString ? `?${c.req.queryString}` : "";
+    return c.redirect(`/api/v1/riot${query}`, 301);
   });
 
   app.notFound((c) => c.json({ ok: false, error: "not found" }, 404));
