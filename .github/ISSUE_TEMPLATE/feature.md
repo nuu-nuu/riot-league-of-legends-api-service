@@ -1,29 +1,33 @@
 ---
-name: Feature / Refactor
-about: Propose a change that adds, removes, or reworks functionality
-title: ''
+name: Feature Request / Refactor
+about: Propose a new feature, improvement, or code refactoring
+title: 'feat: '
 labels: enhancement
 assignees: ''
 ---
 
-**Title:** <!-- short, action-oriented, e.g. "Replace X with Y" -->
+## ✨ Title
+<!-- Short, action-oriented title, e.g., "feat: implement caching for summoner endpoints" -->
 
-**Description:**
+## 📝 Description
+<!-- What is the current behavior/limitation, and why should it change? Keep it brief (1-3 sentences). -->
 
-<!-- What's the current behavior/limitation, and why does it need to change?
-     1-3 sentences of context is enough. -->
+## 🎯 Goal & Expected Behavior
+<!-- What does the ideal end state look like? Include a code snippet, sample request, or config example if applicable. -->
 
-**Goal:** <!-- what the end state looks like, ideally with a concrete example
-     (sample request, config, code snippet, etc.) -->
+```typescript
+// Example snippet / usage here
+```
 
-<!-- example usage of the new behavior, if applicable -->
+## 📋 Scope / Tasks
+- [ ] <!-- Concrete, checkable change #1 -->
+- [ ] <!-- Concrete, checkable change #2 -->
+- [ ] <!-- Concrete, checkable change #3 -->
 
-**Scope:**
-- <!-- concrete, checkable change #1 -->
-- <!-- concrete, checkable change #2 -->
-- <!-- concrete, checkable change #3 -->
+## 🚫 Out of Scope
+<!-- Explicitly list things this task will NOT cover to prevent scope creep. -->
+- 
 
-**Out of scope:** <!-- explicitly call out related things this issue does NOT cover,
-     to prevent scope creep and set expectations for reviewers -->
-
-**Breaking change:** <!-- yes/no — if yes, note what existing users/configs need to change -->
+## ⚠️ Breaking Change?
+- [ ] **No**
+- [ ] **Yes** *(If yes, detail what existing users, env configs, or API routes need to change)*
