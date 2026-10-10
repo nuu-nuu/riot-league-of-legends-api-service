@@ -62,7 +62,7 @@ riot-league-of-legends-api-service/
 ## Installation
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/nuu-nuu/riot-league-of-legends-api-service
 cd riot-league-of-legends-api-service
 npm install
 cp .env.example .env
