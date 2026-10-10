@@ -1,0 +1,11 @@
+# Default owners for the repository
+* @nuu-nuu
+
+# Core app logic
+/src/ @nuu-nuu
+
+# CI and governance
+/.github/ @nuu-nuu
+
+# Security docs
+/SECURITY.md @nuu-nuu

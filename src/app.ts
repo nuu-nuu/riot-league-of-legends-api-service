@@ -107,7 +107,7 @@ export function createApp() {
   });
 
   app.get("/api/riot", (c) => {
-    const query = c.req.queryString ? `?${c.req.queryString}` : "";
+    const query = new URL(c.req.url).search;
     return c.redirect(`/api/v1/riot${query}`, 301);
   });
 
