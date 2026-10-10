@@ -44,7 +44,7 @@ export function createRiotService(tag: string, region: string, gameName: string)
     if (cached) return cached;
     const puuid = await getPuuid();
     const data = await riot<RankEntry[]>(
-      `https://${platform}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}`,
+      `https://${cluster}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}`,
       RIOT_KEY,
     );
     rankCache.set(data);
@@ -56,7 +56,7 @@ export function createRiotService(tag: string, region: string, gameName: string)
     if (cached) return cached;
     const puuid = await getPuuid();
     const data = await riot<MasteryEntry[]>(
-      `https://${platform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=4`,
+      `https://${cluster}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=4`,
       RIOT_KEY,
     );
     masteryCache.set(data);
@@ -68,7 +68,7 @@ export function createRiotService(tag: string, region: string, gameName: string)
     const puuid = await getPuuid();
     try {
       const game = await riot<SpectatorGame>(
-        `https://${platform}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${puuid}`,
+        `https://${cluster}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${puuid}`,
         RIOT_KEY,
       );
       const me = game.participants.find((p) => p.puuid === puuid);
