@@ -49,7 +49,7 @@ riot-league-of-legends-api-service/
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/nuunuu-/riot-league-of-legends-api-service.git](https://github.com/nuunuu-/riot-league-of-legends-api-service.git)
+   git clone https://github.com/nuunuu-/riot-league-of-legends-api-service.git
    cd riot-league-of-legends-api-service
    ```
 
@@ -63,15 +63,6 @@ riot-league-of-legends-api-service/
    ```bash
    cp .env.example .env
    ```
-
-   Open `.env` and fill in your details:
-   ```env
-   PORT=3000
-   NODE_ENV=development
-   RIOT_API_KEY=RGAPI-your-actual-api-key-here
-   RIOT_REGION=euw1
-   ```
-
 ---
 
 ## 🚀 Running the Application
