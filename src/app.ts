@@ -41,19 +41,17 @@ export function createApp() {
     await next();
   };
 
-  app.use(
-    "/api/v1/riot",
-    cors({
-      origin: (origin) => {
-        if (config.allowedOrigins.includes("*")) return "*";
-        if (origin && config.allowedOrigins.includes(origin)) return origin;
-        return null;
-      },
-      allowMethods: ["GET", "OPTIONS"],
-      allowHeaders: ["Content-Type", "Authorization"],
-    }),
-  );
+  const corsMiddleware = cors({
+    origin: (origin) => {
+      if (config.allowedOrigins.includes("*")) return "*";
+      if (origin && config.allowedOrigins.includes(origin)) return origin;
+      return null;
+    },
+    allowMethods: ["GET", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+  });
 
+  app.use("/api/v1/riot", corsMiddleware);
   app.use("/api/v1/riot", riotMiddleware);
 
   app.get("/health", (c) => c.json({ ok: true, uptime: process.uptime() }));
