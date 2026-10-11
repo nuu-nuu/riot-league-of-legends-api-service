@@ -94,12 +94,29 @@ export function createApp() {
   });
 
   app.get("api/v1/riot/rank", async (c) => {
-    const query = c.req.query;
     let rankData : unknown;
 
     try {
       rankData = await riotService!.getRank();
       return c.json({ ok: true, data: rankData });
+    } catch(e) {
+      if (e instanceof RiotApiError) {
+        return c.json({ ok: false, error: e.message }, e.status as never);
+      }
+      return c.json(
+        { ok: false, error: e instanceof Error ? e.message : String(e) },
+        500,
+      );
+    }
+
+  });
+  
+  app.get("api/v1/riot/mastery", async (c) => {
+    let masteryData : unknown;
+
+    try {
+      masteryData = await riotService!.getMastery();
+      return c.json({ ok: true, data: masteryData });
     } catch(e) {
       if (e instanceof RiotApiError) {
         return c.json({ ok: false, error: e.message }, e.status as never);
