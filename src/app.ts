@@ -51,8 +51,14 @@ export function createApp() {
     allowHeaders: ["Content-Type", "Authorization"],
   });
 
+  const apiKeyMiddleware = async (c: any, next: () => Promise<void>) => {
+    if (!config.key) return c.json({ ok: false, error: "RIOT_API_KEY missing in .env" }, 500);
+    await next();
+  }
+
   app.use("/api/v1/riot", corsMiddleware);
   app.use("/api/v1/riot", riotMiddleware);
+  app.use("/api/v1/riot", apiKeyMiddleware);
 
   app.get("/health", (c) => c.json({ ok: true, uptime: process.uptime() }));
 
@@ -62,7 +68,6 @@ export function createApp() {
     const part = c.req.query("part");
 
     try {
-      if (!config.key) throw new Error("RIOT_API_KEY missing in .env");
 
       let data: unknown;
       if (part === "mastery") data = await riotService!.getMastery();
