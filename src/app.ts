@@ -128,6 +128,24 @@ export function createApp() {
     }
 
   });
+    
+  app.get("api/v1/riot/live", async (c) => {
+    let liveData : unknown;
+
+    try {
+      liveData = await riotService!.getLive();
+      return c.json({ ok: true, data: liveData });
+    } catch(e) {
+      if (e instanceof RiotApiError) {
+        return c.json({ ok: false, error: e.message }, e.status as never);
+      }
+      return c.json(
+        { ok: false, error: e instanceof Error ? e.message : String(e) },
+        500,
+      );
+    }
+
+  });
 
   app.notFound((c) => c.json({ ok: false, error: "not found" }, 404));
 
