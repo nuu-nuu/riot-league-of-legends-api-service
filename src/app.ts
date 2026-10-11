@@ -42,19 +42,6 @@ export function createApp() {
   };
 
   app.use(
-    "/api/riot",
-    cors({
-      origin: (origin) => {
-        if (config.allowedOrigins.includes("*")) return "*";
-        if (origin && config.allowedOrigins.includes(origin)) return origin;
-        return null;
-      },
-      allowMethods: ["GET", "OPTIONS"],
-      allowHeaders: ["Content-Type", "Authorization"],
-    }),
-  );
-
-  app.use(
     "/api/v1/riot",
     cors({
       origin: (origin) => {
