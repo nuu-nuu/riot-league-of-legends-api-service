@@ -54,7 +54,6 @@ export function createApp() {
     }),
   );
 
-  app.use("/api/riot", riotMiddleware);
   app.use("/api/v1/riot", riotMiddleware);
 
   app.get("/health", (c) => c.json({ ok: true, uptime: process.uptime() }));
