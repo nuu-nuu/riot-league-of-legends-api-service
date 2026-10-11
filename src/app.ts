@@ -146,6 +146,24 @@ export function createApp() {
     }
 
   });
+  
+  app.get("api/v1/riot/recentKda", async (c) => {
+    let lastKdaData : unknown;
+
+    try {
+      lastKdaData = await riotService!.getRecentKda();
+      return c.json({ ok: true, data: lastKdaData });
+    } catch(e) {
+      if (e instanceof RiotApiError) {
+        return c.json({ ok: false, error: e.message }, e.status as never);
+      }
+      return c.json(
+        { ok: false, error: e instanceof Error ? e.message : String(e) },
+        500,
+      );
+    }
+
+  });
 
   app.notFound((c) => c.json({ ok: false, error: "not found" }, 404));
 
