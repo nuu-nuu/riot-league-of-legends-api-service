@@ -62,37 +62,6 @@ export function createApp() {
 
   app.get("/health", (c) => c.json({ ok: true, uptime: process.uptime() }));
 
-  // GET /api/v1/riot?part=<rank|mastery|live|recent|all>
-  // part is optional; omitting it (or any unrecognized value) returns rank data.
-  app.get("/api/v1/riot", async (c) => {
-    const part = c.req.query("part");
-
-    try {
-      let data: unknown;
-      if (part === "mastery") data = await riotService!.getMastery();
-      else if (part === "live") data = await riotService!.getLive();
-      else if (part === "recent") data = await riotService!.getRecentKda();
-      else if (part === "all") {
-        const [rank, mastery, live] = await Promise.all([
-          riotService!.getRank(),
-          riotService!.getMastery(),
-          riotService!.getLive(),
-        ]);
-        data = { rank, mastery, live };
-      } else data = await riotService!.getRank();
-
-      return c.json({ ok: true, data });
-    } catch (e) {
-      if (e instanceof RiotApiError) {
-        return c.json({ ok: false, error: e.message }, e.status as never);
-      }
-      return c.json(
-        { ok: false, error: e instanceof Error ? e.message : String(e) },
-        500,
-      );
-    }
-  });
-
   app.get("api/v1/riot/rank", async (c) => {
     let rankData : unknown;
 
