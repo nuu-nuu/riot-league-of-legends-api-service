@@ -68,7 +68,6 @@ export function createApp() {
     const part = c.req.query("part");
 
     try {
-
       let data: unknown;
       if (part === "mastery") data = await riotService!.getMastery();
       else if (part === "live") data = await riotService!.getLive();
@@ -85,7 +84,6 @@ export function createApp() {
       return c.json({ ok: true, data });
     } catch (e) {
       if (e instanceof RiotApiError) {
-        // bubble Riot's own status (404/429/504/etc.) instead of masking everything as 200
         return c.json({ ok: false, error: e.message }, e.status as never);
       }
       return c.json(
@@ -95,7 +93,24 @@ export function createApp() {
     }
   });
 
-  app.get("api/v1/riot/rank", async (c) => { });
+  app.get("api/v1/riot/rank", async (c) => {
+    const query = c.req.query;
+    let rankData : unknown;
+
+    try {
+      rankData = await riotService!.getRank();
+      return c.json({ ok: true, data: rankData });
+    } catch(e) {
+      if (e instanceof RiotApiError) {
+        return c.json({ ok: false, error: e.message }, e.status as never);
+      }
+      return c.json(
+        { ok: false, error: e instanceof Error ? e.message : String(e) },
+        500,
+      );
+    }
+
+  });
 
   app.notFound((c) => c.json({ ok: false, error: "not found" }, 404));
 
