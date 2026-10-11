@@ -92,10 +92,7 @@ export function createApp() {
     }
   });
 
-  app.get("/api/riot", (c) => {
-    const query = new URL(c.req.url).search;
-    return c.redirect(`/api/v1/riot${query}`, 301);
-  });
+  app.get("api/v1/riot/rank", async (c) => { });
 
   app.notFound((c) => c.json({ ok: false, error: "not found" }, 404));
 
