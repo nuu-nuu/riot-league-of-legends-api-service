@@ -1,9 +1,8 @@
-// Domain-level Riot operations: looks up an account's puuid, then rank,
-// mastery, live-game status, and recent match KDA for it.
+// Domain-level Riot service. It resolves a player's PUUID and then fetches
+// rank, mastery, live-game, and recent-match data for that account.
 //
-// Exposed as a factory (createRiotService) rather than top-level functions
-// so tests can construct an isolated instance with its own config and cache
-// state instead of sharing module-level singletons across test cases.
+// The factory pattern keeps each test (and each app request) isolated with its
+// own config and cache state instead of sharing module-level singletons.
 
 import { clusterFor, loadConfig, type AppConfig } from "../config.js";
 import { riot, RiotApiError } from "./client.js";
@@ -63,7 +62,8 @@ export function createRiotService(tag: string, region: string, gameName: string)
   }
 
   async function getLive(): Promise<LiveGameStatus> {
-    // never cached — the whole point is "right now"
+    // Live-game state is intentionally not cached because the value should reflect
+    // the current match status as accurately as possible.
     const puuid = await getPuuid();
     try {
       const game = await riot<SpectatorGame>(

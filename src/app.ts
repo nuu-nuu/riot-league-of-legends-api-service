@@ -1,9 +1,10 @@
-// Hono app definition: routes, middleware, CORS. Deliberately has no
-// side effects (no serve()/port binding) so it can be imported directly
-// in tests via app.request(...) without starting a real server.
+// Hono application factory for the Riot API service.
+// The app stays side-effect free (no port binding or server startup here) so
+// tests can import it and call app.request(...) without booting an HTTP server.
 //
-// Bring your own RIOT_API_KEY — this process is the only thing that
-// ever touches it; nothing is exposed to the client beyond /api/v1/riot.
+// The Riot API key is read from configuration and checked before any Riot
+// request is allowed through. The public surface is limited to the /api/v1/riot
+// routes and never exposes the key to the client.
 
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -19,6 +20,8 @@ export function createApp() {
 
   const app = new Hono();
 
+  // Validate the required Riot player identifiers and reuse a cached service per
+  // region/gameName/tag key so repeated requests do not rebuild the client state.
   const riotMiddleware = async (c: any, next: () => Promise<void>) => {
     const region = c.req.query("region");
     const gameName = c.req.query("gameName");
@@ -41,6 +44,7 @@ export function createApp() {
     await next();
   };
 
+  // Allow only the configured origins while keeping the Riot routes read-only.
   const corsMiddleware = cors({
     origin: (origin) => {
       if (config.allowedOrigins.includes("*")) return "*";
@@ -51,6 +55,8 @@ export function createApp() {
     allowHeaders: ["Content-Type", "Authorization"],
   });
 
+  // Fail fast when the server is missing its Riot API key instead of letting the
+  // downstream Riot service throw later in the request lifecycle.
   const apiKeyMiddleware = async (c: any, next: () => Promise<void>) => {
     if (!config.key) return c.json({ ok: false, error: "RIOT_API_KEY missing in .env" }, 500);
     await next();

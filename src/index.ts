@@ -1,6 +1,6 @@
-// Entrypoint. The only module that actually binds a port — app.ts has
-// zero side effects so it can be imported in tests without starting a
-// real server.
+// Entrypoint. This is the one place that starts the Node HTTP server; the app
+// factory in app.ts remains side-effect free so it can be imported in tests
+// without binding a real port.
 
 import { serve } from "@hono/node-server";
 import { createApp } from "./app.js";
