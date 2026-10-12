@@ -62,13 +62,13 @@ export function createApp() {
     await next();
   }
 
-  app.use("/api/v2/riot", corsMiddleware);
-  app.use("/api/v2/riot", riotMiddleware);
-  app.use("/api/v2/riot", apiKeyMiddleware);
+  app.use("/api/v2/riot/*", corsMiddleware);
+  app.use("/api/v2/riot/*", riotMiddleware);
+  app.use("/api/v2/riot/*", apiKeyMiddleware);
 
   app.get("/health", (c) => c.json({ ok: true, uptime: process.uptime() }));
 
-  app.get("api/v2/riot/rank", async (c) => {
+  app.get("/api/v2/riot/rank", async (c) => {
     let rankData : unknown;
 
     try {
@@ -86,7 +86,7 @@ export function createApp() {
 
   });
   
-  app.get("api/v2/riot/mastery", async (c) => {
+  app.get("/api/v2/riot/mastery", async (c) => {
     let masteryData : unknown;
 
     try {
@@ -104,7 +104,7 @@ export function createApp() {
 
   });
     
-  app.get("api/v2/riot/live", async (c) => {
+  app.get("/api/v2/riot/live", async (c) => {
     let liveData : unknown;
 
     try {
@@ -122,7 +122,7 @@ export function createApp() {
 
   });
   
-  app.get("api/v2/riot/recentKda", async (c) => {
+  app.get("/api/v2/riot/recentKda", async (c) => {
     let lastKdaData : unknown;
 
     try {
