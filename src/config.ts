@@ -1,14 +1,14 @@
-// Reads and derives all configuration from environment variables.
-// Centralized here so the rest of the app never touches process.env directly,
-// which also makes it trivial to re-derive config under different env vars
-// in tests without re-importing every module.
+// Reads and derives app configuration from environment variables.
+// Keeping this in one place lets the rest of the app avoid direct
+// process.env access and makes it easy to override config in tests without
+// re-importing every module.
 
 import "dotenv/config";
 
 export const REGIONS = {
   americas: ["na1", "br1", "la1", "la2", "oc1"],
   asia: ["kr", "jp1"],
-  sea: ["ph2", "sg2", "th2", "tw2", "vn2"], // Riot moved these under a 4th cluster, "sea", as of 2023
+  sea: ["ph2", "sg2", "th2", "tw2", "vn2"], // SEA platforms are tracked separately here even though Riot routes them through the Asia cluster for account and match requests.
   europe: ["euw1", "eun1", "tr1", "ru"],
 } as const;
 
@@ -20,8 +20,8 @@ export interface AppConfig {
   allowedOrigins: string[];
 }
 
-// Riot's match/account endpoints live on a continent-level cluster rather
-// than the per-platform region, so derive it from the configured platform.
+// Riot's account and match endpoints are routed by continent-level cluster,
+// not by platform name, so we map each platform to the cluster Riot expects.
 export function clusterFor(platform: string): "americas" | "asia" | "europe" {
   if (["na1", "br1", "la1", "la2", "oc1"].includes(platform)) return "americas";
   if (["kr", "jp1", "ph2", "sg2", "th2", "tw2", "vn2"].includes(platform)) return "asia";

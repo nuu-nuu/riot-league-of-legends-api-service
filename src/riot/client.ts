@@ -1,8 +1,9 @@
-// Low-level HTTP wrapper for Riot's API: adds the auth header, a hard
-// timeout, and automatic retry-with-backoff on 429 responses.
+// Low-level Riot HTTP wrapper. It adds the API token, enforces a request
+// timeout, and retries rate-limited 429 responses using Riot's Retry-After
+// hint.
 
-const FETCH_TIMEOUT_MS = 8000; // abort if Riot's API hangs, instead of hanging the request forever
-const MAX_RETRIES = 2; // retries on 429, honoring Riot's Retry-After header
+const FETCH_TIMEOUT_MS = 8000; // Stop hanging requests if Riot stalls.
+const MAX_RETRIES = 2; // Retry 429s a few times without hammering Riot.
 
 export class RiotApiError extends Error {
   constructor(
@@ -35,7 +36,7 @@ export async function riot<T>(
   }
 
   if (res.status === 429 && attempt < MAX_RETRIES) {
-    // Riot's rate limit — respect Retry-After rather than hammering the API.
+    // Respect Riot's Retry-After header so we back off instead of spamming the API.
     const retryAfter = Number(res.headers.get("Retry-After") ?? "1");
     await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
     return riot<T>(url, apiKey, attempt + 1);

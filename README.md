@@ -16,7 +16,7 @@ This project is designed to be cloned and run as your own self-hosted service. T
 - Health check endpoint
 - Riot account, rank, mastery, live game, and recent match data access
 - Request validation for required query parameters
-- Lightweight in-memory caching for repeated account and rank lookups
+- Lightweight in-memory caching for PUUID, rank, and mastery lookups; live-game status is intentionally not cached
 
 ---
 
@@ -133,36 +133,56 @@ Returns:
 
 ### Riot data
 
-```http
-GET /api/v1/riot?region=kr&gameName=Faker&tag=KR1
-```
-
 Required query parameters:
 
 - `region` — Riot platform region such as `kr`, `na1`, `euw1`, `jp1`
 - `gameName` — Riot account name
 - `tag` — Riot tag line without the `#` symbol
 
-Optional query parameter:
+#### Rank
 
-- `part` — one of `rank`, `mastery`, `live`, `recent`, or `all`
+```http
+GET /api/v2/riot/rank?region=kr&gameName=Faker&tag=KR1
+```
+
+Returns the rank for the requested player.
+
+#### Mastery
+
+```http
+GET /api/v2/riot/mastery?region=kr&gameName=Faker&tag=KR1
+```
+
+Returns the top 3 champion mastery entries for the requested player.
+
+#### Live game
+
+```http
+GET /api/v2/riot/live?region=kr&gameName=Faker&tag=KR1
+```
+
+Returns the current active game status as `{ inGame: true|false, mode, championId, startedAt }`.
+
+If the player is not in a match, the spectator endpoint returns a 404 and the API converts that into `{ inGame: false }` instead of surfacing an error.
+
+#### Recent KDA
+
+```http
+GET /api/v2/riot/recentKda?region=kr&gameName=Faker&tag=KR1
+```
+
+Returns the latest match KDA summary for the account, or `null` when the player has no recent match history.
 
 Examples:
 
 ```bash
-curl "http://localhost:4322/api/v1/riot?region=kr&gameName=Faker&tag=KR1"
-curl "http://localhost:4322/api/v1/riot?region=kr&gameName=Faker&tag=KR1&part=all"
-curl "http://localhost:4322/api/v1/riot?region=na1&gameName=Doublelift&tag=NA1&part=live"
+curl "http://localhost:4322/api/v2/riot/rank?region=kr&gameName=Faker&tag=KR1"
+curl "http://localhost:4322/api/v2/riot/mastery?region=kr&gameName=Faker&tag=KR1"
+curl "http://localhost:4322/api/v2/riot/live?region=na1&gameName=Doublelift&tag=NA1"
+curl "http://localhost:4322/api/v2/riot/recentKda?region=kr&gameName=Faker&tag=KR1"
 ```
 
-### `part` behavior
-
-- `rank` — returns ranked statistics
-- `mastery` — returns top champion mastery entries
-- `live` — returns current active game status
-- `recent` — returns recent match KDA summary
-- `all` — returns rank, mastery, and live data together
-- default behavior — returns rank data if no `part` is specified
+The Riot service intentionally avoids caching live-game data because the current match state can change quickly.
 
 ---
 

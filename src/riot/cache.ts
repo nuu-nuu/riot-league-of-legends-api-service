@@ -1,7 +1,6 @@
-// Simple TTL cache for data that barely changes minute to minute (rank,
-// mastery, account puuid lookups), so we stay well under Riot's rate limits.
-// Live-game and recent-match data are intentionally never cached — staleness
-// would defeat the point of those endpoints.
+// Small TTL cache for data that changes infrequently (rank, mastery, and PUUID
+// lookups). This keeps requests under Riot's rate limits without caching live
+// match state, which would become stale immediately.
 
 export const CACHE_MS = 30 * 60 * 1000;
 

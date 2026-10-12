@@ -1,9 +1,10 @@
-// Hono app definition: routes, middleware, CORS. Deliberately has no
-// side effects (no serve()/port binding) so it can be imported directly
-// in tests via app.request(...) without starting a real server.
+// Hono application factory for the Riot API service.
+// The app stays side-effect free (no port binding or server startup here) so
+// tests can import it and call app.request(...) without booting an HTTP server.
 //
-// Bring your own RIOT_API_KEY — this process is the only thing that
-// ever touches it; nothing is exposed to the client beyond /api/v1/riot.
+// The Riot API key is read from configuration and checked before any Riot
+// request is allowed through. The public surface is limited to the /api/v2/riot
+// routes and never exposes the key to the client.
 
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -19,6 +20,8 @@ export function createApp() {
 
   const app = new Hono();
 
+  // Validate the required Riot player identifiers and reuse a cached service per
+  // region/gameName/tag key so repeated requests do not rebuild the client state.
   const riotMiddleware = async (c: any, next: () => Promise<void>) => {
     const region = c.req.query("region");
     const gameName = c.req.query("gameName");
@@ -41,62 +44,38 @@ export function createApp() {
     await next();
   };
 
-  app.use(
-    "/api/riot",
-    cors({
-      origin: (origin) => {
-        if (config.allowedOrigins.includes("*")) return "*";
-        if (origin && config.allowedOrigins.includes(origin)) return origin;
-        return null;
-      },
-      allowMethods: ["GET", "OPTIONS"],
-      allowHeaders: ["Content-Type", "Authorization"],
-    }),
-  );
+  // Allow only the configured origins while keeping the Riot routes read-only.
+  const corsMiddleware = cors({
+    origin: (origin) => {
+      if (config.allowedOrigins.includes("*")) return "*";
+      if (origin && config.allowedOrigins.includes(origin)) return origin;
+      return null;
+    },
+    allowMethods: ["GET", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+  });
 
-  app.use(
-    "/api/v1/riot",
-    cors({
-      origin: (origin) => {
-        if (config.allowedOrigins.includes("*")) return "*";
-        if (origin && config.allowedOrigins.includes(origin)) return origin;
-        return null;
-      },
-      allowMethods: ["GET", "OPTIONS"],
-      allowHeaders: ["Content-Type", "Authorization"],
-    }),
-  );
+  // Fail fast when the server is missing its Riot API key instead of letting the
+  // downstream Riot service throw later in the request lifecycle.
+  const apiKeyMiddleware = async (c: any, next: () => Promise<void>) => {
+    if (!config.key) return c.json({ ok: false, error: "RIOT_API_KEY missing in .env" }, 500);
+    await next();
+  }
 
-  app.use("/api/riot", riotMiddleware);
-  app.use("/api/v1/riot", riotMiddleware);
+  app.use("/api/v2/riot/*", corsMiddleware);
+  app.use("/api/v2/riot/*", riotMiddleware);
+  app.use("/api/v2/riot/*", apiKeyMiddleware);
 
   app.get("/health", (c) => c.json({ ok: true, uptime: process.uptime() }));
 
-  // GET /api/v1/riot?part=<rank|mastery|live|recent|all>
-  // part is optional; omitting it (or any unrecognized value) returns rank data.
-  app.get("/api/v1/riot", async (c) => {
-    const part = c.req.query("part");
+  app.get("/api/v2/riot/rank", async (c) => {
+    let rankData : unknown;
 
     try {
-      if (!config.key) throw new Error("RIOT_API_KEY missing in .env");
-
-      let data: unknown;
-      if (part === "mastery") data = await riotService!.getMastery();
-      else if (part === "live") data = await riotService!.getLive();
-      else if (part === "recent") data = await riotService!.getRecentKda();
-      else if (part === "all") {
-        const [rank, mastery, live] = await Promise.all([
-          riotService!.getRank(),
-          riotService!.getMastery(),
-          riotService!.getLive(),
-        ]);
-        data = { rank, mastery, live };
-      } else data = await riotService!.getRank();
-
-      return c.json({ ok: true, data });
-    } catch (e) {
+      rankData = await riotService!.getRank();
+      return c.json({ ok: true, data: rankData });
+    } catch(e) {
       if (e instanceof RiotApiError) {
-        // bubble Riot's own status (404/429/504/etc.) instead of masking everything as 200
         return c.json({ ok: false, error: e.message }, e.status as never);
       }
       return c.json(
@@ -104,11 +83,61 @@ export function createApp() {
         500,
       );
     }
-  });
 
-  app.get("/api/riot", (c) => {
-    const query = new URL(c.req.url).search;
-    return c.redirect(`/api/v1/riot${query}`, 301);
+  });
+  
+  app.get("/api/v2/riot/mastery", async (c) => {
+    let masteryData : unknown;
+
+    try {
+      masteryData = await riotService!.getMastery();
+      return c.json({ ok: true, data: masteryData });
+    } catch(e) {
+      if (e instanceof RiotApiError) {
+        return c.json({ ok: false, error: e.message }, e.status as never);
+      }
+      return c.json(
+        { ok: false, error: e instanceof Error ? e.message : String(e) },
+        500,
+      );
+    }
+
+  });
+    
+  app.get("/api/v2/riot/live", async (c) => {
+    let liveData : unknown;
+
+    try {
+      liveData = await riotService!.getLive();
+      return c.json({ ok: true, data: liveData });
+    } catch(e) {
+      if (e instanceof RiotApiError) {
+        return c.json({ ok: false, error: e.message }, e.status as never);
+      }
+      return c.json(
+        { ok: false, error: e instanceof Error ? e.message : String(e) },
+        500,
+      );
+    }
+
+  });
+  
+  app.get("/api/v2/riot/recentKda", async (c) => {
+    let lastKdaData : unknown;
+
+    try {
+      lastKdaData = await riotService!.getRecentKda();
+      return c.json({ ok: true, data: lastKdaData });
+    } catch(e) {
+      if (e instanceof RiotApiError) {
+        return c.json({ ok: false, error: e.message }, e.status as never);
+      }
+      return c.json(
+        { ok: false, error: e instanceof Error ? e.message : String(e) },
+        500,
+      );
+    }
+
   });
 
   app.notFound((c) => c.json({ ok: false, error: "not found" }, 404));

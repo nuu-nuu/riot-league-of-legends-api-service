@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-10-12
+
+### Added
+- New versioned API route at `/api/v2/riot` with improved endpoint design.
+- Enhanced request validation and error handling.
+
+### Changed
+- Migrated all endpoints from `/api/v1/riot` to `/api/v2/riot`.
+- Updated the package version to `2.0.0`.
+- Improved internal API consistency and response schemas.
+
+### Deprecated
+- `/api/v1/riot` routes are no longer recommended; clients should migrate to `/api/v2/riot`.
+
+---
+
 ## [1.0.0] - 2026-10-10
 
 ### Added
