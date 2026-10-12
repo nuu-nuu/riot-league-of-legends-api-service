@@ -69,12 +69,12 @@ export function createApp() {
   app.get("/health", (c) => c.json({ ok: true, uptime: process.uptime() }));
 
   app.get("/api/v2/riot/rank", async (c) => {
-    let rankData : unknown;
+    let rankData: unknown;
 
     try {
       rankData = await riotService!.getRank();
       return c.json({ ok: true, data: rankData });
-    } catch(e) {
+    } catch (e) {
       if (e instanceof RiotApiError) {
         return c.json({ ok: false, error: e.message }, e.status as never);
       }
@@ -85,24 +85,46 @@ export function createApp() {
     }
 
   });
-  
+
   app.get("/api/v2/riot/mastery", async (c) => {
-    let masteryData : unknown;
+    let masteryData: unknown;
     let query = c.req.query;
     let count = query("count");
+    let total = query("total");
+    let championName = query("championName");
 
     try {
-      if(count && !isNaN(parseInt(count))) return c.json({ ok: false, error: "Count must be a number" }, 400);
 
-      if(count) {
+      // championName has priority over count and total, but both are optional
+      if (championName) {
+      let champId = !riotService!.getChampionIdByName(championName);
+
+        if (champId) {
+          return c.json({ ok: false, error: "Champion name not found" }, 400);
+        }
+
+        masteryData = await riotService!.getMasteryByChampion(champId);
+        return c.json({ ok: true, data: masteryData });
+      }
+
+      // total amount of points has priority over count, but both are optional
+      if (total) {
+        masteryData = await riotService!.getTotalMasteryPoints();
+        return c.json({ ok: true, data: masteryData });
+
+      }
+
+      // count has low priority and count all is the default if no other query is provided
+      if (count && !isNaN(parseInt(count))) return c.json({ ok: false, error: "Count must be a number" }, 400);
+
+      if (count) {
         masteryData = await riotService!.getMastery(parseInt(count));
         return c.json({ ok: true, data: masteryData });
       } else {
         masteryData = await riotService!.getMastery(0);
         return c.json({ ok: true, data: masteryData });
       }
-      
-    } catch(e) {
+    } catch (e) {
       if (e instanceof RiotApiError) {
         return c.json({ ok: false, error: e.message }, e.status as never);
       }
@@ -113,14 +135,14 @@ export function createApp() {
     }
 
   });
-    
+
   app.get("/api/v2/riot/live", async (c) => {
-    let liveData : unknown;
+    let liveData: unknown;
 
     try {
       liveData = await riotService!.getLive();
       return c.json({ ok: true, data: liveData });
-    } catch(e) {
+    } catch (e) {
       if (e instanceof RiotApiError) {
         return c.json({ ok: false, error: e.message }, e.status as never);
       }
@@ -131,14 +153,14 @@ export function createApp() {
     }
 
   });
-  
+
   app.get("/api/v2/riot/recentKda", async (c) => {
-    let lastKdaData : unknown;
+    let lastKdaData: unknown;
 
     try {
       lastKdaData = await riotService!.getRecentKda();
       return c.json({ ok: true, data: lastKdaData });
-    } catch(e) {
+    } catch (e) {
       if (e instanceof RiotApiError) {
         return c.json({ ok: false, error: e.message }, e.status as never);
       }

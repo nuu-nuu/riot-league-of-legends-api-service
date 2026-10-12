@@ -26,6 +26,7 @@ export function createRiotService(tag: string, region: string, gameName: string)
   const puuidCache = new TtlCache<string>();
   const rankCache = new TtlCache<RankEntry[]>();
   const masteryCache = new TtlCache<MasteryEntry[]>();
+  const championMasteryCache = new TtlCache<MasteryEntry>();
 
   async function getPuuid(): Promise<string> {
     const cached = puuidCache.get();
@@ -69,6 +70,21 @@ export function createRiotService(tag: string, region: string, gameName: string)
       );
     }
 
+    return data;
+  }
+
+  async function getChampionIdByName(championName: string) {
+    const puuid = await getPuuid();
+    let data: any;
+    const cached = championMasteryCache.get();
+    if (cached) return cached;
+
+    data = await riot<MasteryEntry>(
+      `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/by-champion/${championName}`,
+      RIOT_KEY,
+    );
+
+    championMasteryCache.set(data);
     return data;
   }
 
@@ -116,7 +132,7 @@ export function createRiotService(tag: string, region: string, gameName: string)
     };
   }
 
-  return { getPuuid, getRank, getMastery, getLive, getRecentKda };
+  return { getPuuid, getRank, getMastery, getChampionIdByName, getLive, getRecentKda };
 }
 
 export type RiotService = ReturnType<typeof createRiotService>;
