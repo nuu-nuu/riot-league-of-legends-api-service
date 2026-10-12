@@ -142,7 +142,7 @@ Required query parameters:
 #### Rank
 
 ```http
-GET /api/v1/riot/rank?region=kr&gameName=Faker&tag=KR1
+GET /api/v2/riot/rank?region=kr&gameName=Faker&tag=KR1
 ```
 
 Returns the rank for the requested player.
@@ -150,7 +150,7 @@ Returns the rank for the requested player.
 #### Mastery
 
 ```http
-GET /api/v1/riot/mastery?region=kr&gameName=Faker&tag=KR1
+GET /api/v2/riot/mastery?region=kr&gameName=Faker&tag=KR1
 ```
 
 Returns the top 3 champion mastery entries for the requested player.
@@ -158,7 +158,7 @@ Returns the top 3 champion mastery entries for the requested player.
 #### Live game
 
 ```http
-GET /api/v1/riot/live?region=kr&gameName=Faker&tag=KR1
+GET /api/v2/riot/live?region=kr&gameName=Faker&tag=KR1
 ```
 
 Returns the current active game status as `{ inGame: true|false, mode, championId, startedAt }`.
@@ -168,7 +168,7 @@ If the player is not in a match, the spectator endpoint returns a 404 and the AP
 #### Recent KDA
 
 ```http
-GET /api/v1/riot/recentKda?region=kr&gameName=Faker&tag=KR1
+GET /api/v2/riot/recentKda?region=kr&gameName=Faker&tag=KR1
 ```
 
 Returns the latest match KDA summary for the account, or `null` when the player has no recent match history.
@@ -176,10 +176,10 @@ Returns the latest match KDA summary for the account, or `null` when the player 
 Examples:
 
 ```bash
-curl "http://localhost:4322/api/v1/riot/rank?region=kr&gameName=Faker&tag=KR1"
-curl "http://localhost:4322/api/v1/riot/mastery?region=kr&gameName=Faker&tag=KR1"
-curl "http://localhost:4322/api/v1/riot/live?region=na1&gameName=Doublelift&tag=NA1"
-curl "http://localhost:4322/api/v1/riot/recentKda?region=kr&gameName=Faker&tag=KR1"
+curl "http://localhost:4322/api/v2/riot/rank?region=kr&gameName=Faker&tag=KR1"
+curl "http://localhost:4322/api/v2/riot/mastery?region=kr&gameName=Faker&tag=KR1"
+curl "http://localhost:4322/api/v2/riot/live?region=na1&gameName=Doublelift&tag=NA1"
+curl "http://localhost:4322/api/v2/riot/recentKda?region=kr&gameName=Faker&tag=KR1"
 ```
 
 The Riot service intentionally avoids caching live-game data because the current match state can change quickly.
