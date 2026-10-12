@@ -61,3 +61,7 @@ export interface RecentMatchSummary {
   win: boolean;
   mode: string;
 }
+
+export interface LeagueOfLegendsVersion {
+  currVers: string;
+}
