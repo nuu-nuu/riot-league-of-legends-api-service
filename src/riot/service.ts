@@ -51,16 +51,17 @@ export function createRiotService(tag: string, region: string, gameName: string)
   }
 
   async function getMastery(count: number): Promise<MasteryEntry[]> {
-    const cached = masteryCache.get();
-    if (cached) return cached;
     const puuid = await getPuuid();
     let data: any;
 
     if (count == 0) {
+      const cached = masteryCache.get();
+      if (cached) return cached;
       data = await riot<MasteryEntry[]>(
         `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}`,
         RIOT_KEY,
       );
+      masteryCache.set(data);
     } else {
       data = await riot<MasteryEntry[]>(
         `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=${count}`,
@@ -68,7 +69,6 @@ export function createRiotService(tag: string, region: string, gameName: string)
       );
     }
 
-    masteryCache.set(data);
     return data;
   }
 
