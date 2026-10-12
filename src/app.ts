@@ -88,10 +88,20 @@ export function createApp() {
   
   app.get("/api/v2/riot/mastery", async (c) => {
     let masteryData : unknown;
+    let query = c.req.query;
+    let count = query("count");
 
     try {
-      masteryData = await riotService!.getMastery();
-      return c.json({ ok: true, data: masteryData });
+      if(count && !isNaN(parseInt(count))) return c.json({ ok: false, error: "Count must be a number" }, 400);
+
+      if(count) {
+        masteryData = await riotService!.getMastery(parseInt(count));
+        return c.json({ ok: true, data: masteryData });
+      } else {
+        masteryData = await riotService!.getMastery(0);
+        return c.json({ ok: true, data: masteryData });
+      }
+      
     } catch(e) {
       if (e instanceof RiotApiError) {
         return c.json({ ok: false, error: e.message }, e.status as never);
