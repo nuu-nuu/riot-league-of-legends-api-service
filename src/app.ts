@@ -97,7 +97,7 @@ export function createApp() {
 
       // championName has priority over count and total, but both are optional
       if (championName) {
-      let champId = !riotService!.getChampionIdByName(championName);
+      let champId = await riotService!.getChampionIdByName(championName);
 
         if (champId) {
           return c.json({ ok: false, error: "Champion name not found" }, 400);
