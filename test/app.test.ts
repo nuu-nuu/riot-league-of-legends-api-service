@@ -149,6 +149,66 @@ describe("GET /api/v2/riot/mastery — happy path (fetch mocked)", () => {
     expect(body.ok).toBe(true);
     expect(body.data[0].championId).toBe(7);
   });
+
+  it("returns top N champion mastery entries when count is provided", async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ puuid: PUUID }))
+      .mockResolvedValueOnce(
+        jsonResponse([
+          { championId: 7, championLevel: 7, championPoints: 999999 },
+          { championId: 8, championLevel: 6, championPoints: 750000 },
+        ]),
+      );
+
+    const app = await loadApp();
+    const res = await app.request("/api/v2/riot/mastery?region=kr&gameName=Faker&tag=KR1&count=2");
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.ok).toBe(true);
+    expect(body.data).toHaveLength(2);
+    expect(body.data[1].championId).toBe(8);
+  });
+
+  it("returns total mastery points when total is requested", async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ puuid: PUUID }))
+      .mockResolvedValueOnce(
+        jsonResponse([
+          { championId: 7, championLevel: 7, championPoints: 1100 },
+          { championId: 8, championLevel: 5, championPoints: 900 },
+        ]),
+      );
+
+    const app = await loadApp();
+    const res = await app.request("/api/v2/riot/mastery?region=kr&gameName=Faker&tag=KR1&total=true");
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.ok).toBe(true);
+    expect(body.data).toBe(2000);
+  });
+
+  it("returns a champion mastery entry by champion name", async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(["15.10.1"]))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          data: {
+            Azir: { id: "Azir", key: "268" },
+          },
+        }),
+      )
+      .mockResolvedValueOnce(jsonResponse({ puuid: PUUID }))
+      .mockResolvedValueOnce(
+        jsonResponse([{ championId: 268, championLevel: 7, championPoints: 250000 }]),
+      );
+
+    const app = await loadApp();
+    const res = await app.request("/api/v2/riot/mastery?region=kr&gameName=Faker&tag=KR1&championName=Azir");
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.ok).toBe(true);
+    expect(body.data[0].championId).toBe(268);
+  });
 });
 
 describe("GET /api/v2/riot/live — happy path (fetch mocked)", () => {
