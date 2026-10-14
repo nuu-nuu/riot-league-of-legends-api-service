@@ -66,7 +66,15 @@ export interface LeagueOfLegendsVersion {
   currVers: string;
 }
 
+export interface ChampionData {
+  type: string;
+  format: string;
+  version: string;
+  data: Champion[];
+}
+
 export interface Champion {
   name: string;
+  id: string;
   key: number;
 }

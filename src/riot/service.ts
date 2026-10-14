@@ -18,7 +18,8 @@ import type {
   Match,
   LiveGameStatus,
   RecentMatchSummary,
-  Champion
+  Champion,
+  ChampionData
 } from "../types.js";
 
 export function createRiotService(tag: string, region: string, gameName: string) {
@@ -110,14 +111,14 @@ export function createRiotService(tag: string, region: string, gameName: string)
 
   async function getChampionIdByName(championName: string) {
     // implement cache control
-    const champions : Champion[] = await ddragonService.getChampionData();
+    const champions : ChampionData = await ddragonService.getChampionData();
   
     let championId : number = 0;
 
-    // not an array -> object!!
-    for(const champion of champions) {
-      if(champion.name.toLowerCase() === championName.toLowerCase()) {
-        championId = champion.key;
+    for(const champion in champions.data) {
+      if(champions.data[champion].id.toLowerCase() === championName.toLowerCase()) {
+        console.log(champion)
+        championId = champions.data[champion].key;
         break;
       }
     }

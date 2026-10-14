@@ -8,13 +8,14 @@
 import { TtlCache } from "../cache.js";
 import { ddragon } from "./client.js";
 import type {
-  LeagueOfLegendsVersion, Champion
+  LeagueOfLegendsVersion, Champion,
+  ChampionData
 } from "../types.js";
 
 export function createDdragonService() {
 
   const versionCache = new TtlCache<LeagueOfLegendsVersion>();
-  const championCache = new TtlCache<Champion[]>();
+  const championCache = new TtlCache<ChampionData>();
 
   async function getCurrentGameVersion(): Promise<LeagueOfLegendsVersion> {
     const cached = versionCache.get();
@@ -29,12 +30,12 @@ export function createDdragonService() {
     return curr;
   }
 
-  async function getChampionData(): Promise<Champion[]> {
+  async function getChampionData(): Promise<ChampionData> {
     const version : LeagueOfLegendsVersion = await getCurrentGameVersion();
     const cached = championCache.get();
     if (cached) return cached;
 
-    const data : Champion[] = await ddragon<Champion[]>(
+    const data : ChampionData = await ddragon<ChampionData>(
       `https://ddragon.leagueoflegends.com/cdn/${version}/data/en_US/champion.json`
     );
 
