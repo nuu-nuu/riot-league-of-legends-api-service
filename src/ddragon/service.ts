@@ -5,30 +5,27 @@
 // so tests can construct an isolated instance with its own config and cache
 // state instead of sharing module-level singletons across test cases.
 
-import { clusterFor, loadConfig, type AppConfig } from "../config.js";
 import { TtlCache } from "../cache.js";
-import { ddragon, DdragonApiError } from "./client.js";
+import { ddragon } from "./client.js";
 import type {
-  LeagueOfLegendsVersion,
+  LeagueOfLegendsVersion, Champion
 } from "../types.js";
 
-export function createDdragonService(tag: string, region: string, gameName: string) {
-  const cluster = clusterFor(region);
-  const CONFIG = loadConfig();
-  const RIOT_KEY = CONFIG.key;
+export function createDdragonService() {
 
-  const versionCache = new TtlCache<string>();
+  const versionCache = new TtlCache<LeagueOfLegendsVersion>();
+  const championCache = new TtlCache<Champion[]>();
 
-  async function getCurrentGameVersion(): Promise<string> {
+  async function getCurrentGameVersion(): Promise<LeagueOfLegendsVersion> {
     const cached = versionCache.get();
     if (cached) return cached;
-    const versions : any = await ddragon<LeagueOfLegendsVersion>(
+    const versions : LeagueOfLegendsVersion[] = await ddragon<LeagueOfLegendsVersion[]>(
       `https://ddragon.leagueoflegends.com/api/versions.json`
     );
 
     console.log(versions);
 
-    const curr = versions[0][0];
+    const curr : LeagueOfLegendsVersion = versions[0];
 
     console.log(curr);
 
@@ -36,21 +33,22 @@ export function createDdragonService(tag: string, region: string, gameName: stri
     return curr;
   }
 
-  /* async function getRank(): Promise<RankEntry[]> {
-    const cached = rankCache.get();
+  async function getChampionData(): Promise<Champion[]> {
+    const version : LeagueOfLegendsVersion = await getCurrentGameVersion();
+    const cached = championCache.get();
     if (cached) return cached;
-    const puuid = await getPuuid();
-    const data = await ddragon<RankEntry[]>(
-      `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}`,
-      RIOT_KEY,
+
+    const data : Champion[] = await ddragon<Champion[]>(
+      `https://ddragon.leagueoflegends.com/cdn/${version}/data/en_US/champion.json`
     );
-    rankCache.set(data);
+
+    console.log(data);
+
+    championCache.set(data);
     return data;
-  } */
+  }
 
- 
-
-  return { getCurrentGameVersion };
+  return { getCurrentGameVersion, getChampionData };
 }
 
-export type RiotService = ReturnType<typeof createDdragonService>;
+export type DdragonService = ReturnType<typeof createDdragonService>;

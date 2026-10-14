@@ -65,3 +65,7 @@ export interface RecentMatchSummary {
 export interface LeagueOfLegendsVersion {
   currVers: string;
 }
+
+export interface Champion {
+  name: string;
+}

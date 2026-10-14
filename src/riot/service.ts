@@ -8,6 +8,8 @@
 import { clusterFor, loadConfig, type AppConfig } from "../config.js";
 import { TtlCache } from "../cache.js";
 import { riot, RiotApiError } from "./client.js";
+import { createDdragonService } from "../ddragon/service.js";
+
 import type {
   RiotAccount,
   RankEntry,
@@ -22,6 +24,8 @@ export function createRiotService(tag: string, region: string, gameName: string)
   const cluster = clusterFor(region);
   const CONFIG = loadConfig();
   const RIOT_KEY = CONFIG.key;
+
+  const ddragonService = createDdragonService();
 
   const puuidCache = new TtlCache<string>();
   const rankCache = new TtlCache<RankEntry[]>();
