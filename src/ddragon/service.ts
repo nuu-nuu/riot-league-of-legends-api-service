@@ -23,11 +23,7 @@ export function createDdragonService() {
       `https://ddragon.leagueoflegends.com/api/versions.json`
     );
 
-    console.log(versions);
-
     const curr : LeagueOfLegendsVersion = versions[0];
-
-    console.log(curr);
 
     versionCache.set(curr);
     return curr;
@@ -41,8 +37,6 @@ export function createDdragonService() {
     const data : Champion[] = await ddragon<Champion[]>(
       `https://ddragon.leagueoflegends.com/cdn/${version}/data/en_US/champion.json`
     );
-
-    console.log(data);
 
     championCache.set(data);
     return data;

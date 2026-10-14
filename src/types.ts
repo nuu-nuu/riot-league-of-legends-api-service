@@ -68,4 +68,5 @@ export interface LeagueOfLegendsVersion {
 
 export interface Champion {
   name: string;
+  key: number;
 }

@@ -18,6 +18,7 @@ import type {
   Match,
   LiveGameStatus,
   RecentMatchSummary,
+  Champion,
 } from "../types.js";
 
 export function createRiotService(tag: string, region: string, gameName: string) {
@@ -108,18 +109,13 @@ export function createRiotService(tag: string, region: string, gameName: string)
   }
 
   async function getChampionIdByName(championName: string) {
-    const puuid = await getPuuid();
-    let data: any;
-    const cached = championMasteryCache.get();
-    if (cached) return cached;
+    // implement cache control
+    const champions : Champion[] = await ddragonService.getChampionData();
+    console.log(typeof(champions));
+  
+    const championId = champions.find((champ) => champ.name.toLowerCase() === championName.toLowerCase())?.key;
 
-    data = await riot<MasteryEntry>(
-      `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/by-champion/${championName}`,
-      RIOT_KEY,
-    );
-
-    championMasteryCache.set(data);
-    return data;
+    return championId;
   }
 
   async function getLive(): Promise<LiveGameStatus> {
