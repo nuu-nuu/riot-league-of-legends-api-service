@@ -153,7 +153,23 @@ Returns the rank for the requested player.
 GET /api/v2/riot/mastery?region=kr&gameName=Faker&tag=KR1
 ```
 
-Returns the top 3 champion mastery entries for the requested player.
+Optional query parameters:
+
+- `count` — return the top `N` champion mastery entries
+- `total` — return the total champion mastery points as a number
+- `championName` — resolve a champion name to its Riot ID and return that champion’s mastery entry
+
+Precedence is: `championName` > `total` > `count` > default full mastery list.
+
+Examples:
+
+```http
+GET /api/v2/riot/mastery?region=kr&gameName=Faker&tag=KR1&count=5
+GET /api/v2/riot/mastery?region=kr&gameName=Faker&tag=KR1&total=true
+GET /api/v2/riot/mastery?region=kr&gameName=Faker&tag=KR1&championName=Azir
+```
+
+Returns the matching Champion Mastery data for the requested player.
 
 #### Live game
 
@@ -221,14 +237,14 @@ MAJOR.MINOR.PATCH
 The current release is:
 
 ```text
-1.0.0
+2.1.0
 ```
 
 ### API versioning
 
-This project exposes the public route at `/api/v1/riot`.
+This project exposes the public route at `/api/v2/riot`.
 
-This versioned contract is intended for stable public usage. If the API changes in a breaking way in the future, a new route such as `/api/v2/riot` should be introduced instead of modifying `/api/v1/riot` in place.
+This versioned contract is intended for stable public usage. If the API changes in a breaking way in the future, a new route should be introduced instead of modifying the current contract in place.
 
 ### Versioning policy
 

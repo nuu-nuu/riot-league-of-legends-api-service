@@ -1,12 +1,15 @@
-// Domain-level Riot service. It resolves a player's PUUID and then fetches
-// rank, mastery, live-game, and recent-match data for that account.
+// Domain-level Riot operations: looks up an account's puuid, then rank,
+// mastery, live-game status, and recent match KDA for it.
 //
-// The factory pattern keeps each test (and each app request) isolated with its
-// own config and cache state instead of sharing module-level singletons.
+// Exposed as a factory (createRiotService) rather than top-level functions
+// so tests can construct an isolated instance with its own config and cache
+// state instead of sharing module-level singletons across test cases.
 
 import { clusterFor, loadConfig, type AppConfig } from "../config.js";
+import { TtlCache } from "../cache.js";
 import { riot, RiotApiError } from "./client.js";
-import { TtlCache } from "./cache.js";
+import { createDdragonService } from "../ddragon/service.js";
+
 import type {
   RiotAccount,
   RankEntry,
@@ -15,6 +18,8 @@ import type {
   Match,
   LiveGameStatus,
   RecentMatchSummary,
+  Champion,
+  ChampionData
 } from "../types.js";
 
 export function createRiotService(tag: string, region: string, gameName: string) {
@@ -22,9 +27,13 @@ export function createRiotService(tag: string, region: string, gameName: string)
   const CONFIG = loadConfig();
   const RIOT_KEY = CONFIG.key;
 
+  const ddragonService = createDdragonService();
+
   const puuidCache = new TtlCache<string>();
   const rankCache = new TtlCache<RankEntry[]>();
   const masteryCache = new TtlCache<MasteryEntry[]>();
+  const masteryTotalCache = new TtlCache<number>();
+  const championMasteryCache = new TtlCache<MasteryEntry>();
 
   async function getPuuid(): Promise<string> {
     const cached = puuidCache.get();
@@ -49,21 +58,74 @@ export function createRiotService(tag: string, region: string, gameName: string)
     return data;
   }
 
-  async function getMastery(): Promise<MasteryEntry[]> {
-    const cached = masteryCache.get();
-    if (cached) return cached;
+  async function getMastery(count: number): Promise<MasteryEntry[]> {
     const puuid = await getPuuid();
-    const data = await riot<MasteryEntry[]>(
-      `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=4`,
-      RIOT_KEY,
-    );
-    masteryCache.set(data);
+    let data: any;
+
+    if (count == 0) {
+      const cached = masteryCache.get();
+      if (cached) return cached;
+      data = await riot<MasteryEntry[]>(
+        `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}`,
+        RIOT_KEY,
+      );
+      masteryCache.set(data);
+    } else {
+      data = await riot<MasteryEntry[]>(
+        `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=${count}`,
+        RIOT_KEY,
+      );
+    }
+
     return data;
   }
 
+  async function getMasteryByChampion(champId: number): Promise<MasteryEntry[]> {
+    const puuid = await getPuuid();
+    let data: any;
+
+    const cached = masteryCache.get();
+    if (cached) return cached;
+    data = await riot<MasteryEntry[]>(
+      `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/by-champion/${champId}`,
+      RIOT_KEY,
+    );
+
+    return data;
+  }
+
+  async function getTotalMasteryPoints(): Promise<number> {
+    const cached = masteryTotalCache.get();
+    if (cached) return cached;
+
+    const puuid = await getPuuid();
+    const data = await riot<MasteryEntry[]>(
+      `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}`,
+      RIOT_KEY,
+    );
+
+    const total = data.reduce((sum, entry) => sum + entry.championPoints, 0);
+    masteryTotalCache.set(total);
+    return total;
+  }
+
+  async function getChampionIdByName(championName: string): Promise<number> {
+    const champions: ChampionData = await ddragonService.getChampionData();
+    const normalizedName = championName.trim().toLowerCase();
+    const championEntries = Object.values(champions.data ?? {}) as Champion[];
+
+    for (const champion of championEntries) {
+      const candidateName = String(champion?.id ?? champion?.name ?? "").toLowerCase();
+      if (candidateName === normalizedName) {
+        return Number(champion.key ?? 0);
+      }
+    }
+
+    return 0;
+  }
+
   async function getLive(): Promise<LiveGameStatus> {
-    // Live-game state is intentionally not cached because the value should reflect
-    // the current match status as accurately as possible.
+    // never cached — the whole point is "right now"
     const puuid = await getPuuid();
     try {
       const game = await riot<SpectatorGame>(
@@ -106,7 +168,16 @@ export function createRiotService(tag: string, region: string, gameName: string)
     };
   }
 
-  return { getPuuid, getRank, getMastery, getLive, getRecentKda };
+  return {
+    getPuuid,
+    getRank,
+    getMastery,
+    getMasteryByChampion,
+    getTotalMasteryPoints,
+    getChampionIdByName,
+    getLive,
+    getRecentKda,
+  };
 }
 
 export type RiotService = ReturnType<typeof createRiotService>;
