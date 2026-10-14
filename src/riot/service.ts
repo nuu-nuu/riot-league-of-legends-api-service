@@ -26,6 +26,7 @@ export function createRiotService(tag: string, region: string, gameName: string)
   const puuidCache = new TtlCache<string>();
   const rankCache = new TtlCache<RankEntry[]>();
   const masteryCache = new TtlCache<MasteryEntry[]>();
+  const masteryTotalCache = new TtlCache<number>();
   const championMasteryCache = new TtlCache<MasteryEntry>();
 
   async function getPuuid(): Promise<string> {
@@ -71,6 +72,35 @@ export function createRiotService(tag: string, region: string, gameName: string)
     }
 
     return data;
+  }
+
+  async function getMasteryByChampion(champId: number): Promise<MasteryEntry[]> {
+    const puuid = await getPuuid();
+    let data: any;
+
+    const cached = masteryCache.get();
+    if (cached) return cached;
+    data = await riot<MasteryEntry[]>(
+      `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/by-champion/${champId}`,
+      RIOT_KEY,
+    );
+
+    return data;
+  }
+
+  async function getTotalMasteryPoints(): Promise<number> {
+    const cached = masteryTotalCache.get();
+    if (cached) return cached;
+
+    const puuid = await getPuuid();
+    const data = await riot<MasteryEntry[]>(
+      `https://${region}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}`,
+      RIOT_KEY,
+    );
+
+    const total = data.reduce((sum, entry) => sum + entry.championPoints, 0);
+    masteryTotalCache.set(total);
+    return total;
   }
 
   async function getChampionIdByName(championName: string) {
@@ -132,7 +162,16 @@ export function createRiotService(tag: string, region: string, gameName: string)
     };
   }
 
-  return { getPuuid, getRank, getMastery, getChampionIdByName, getLive, getRecentKda };
+  return {
+    getPuuid,
+    getRank,
+    getMastery,
+    getMasteryByChampion,
+    getTotalMasteryPoints,
+    getChampionIdByName,
+    getLive,
+    getRecentKda,
+  };
 }
 
 export type RiotService = ReturnType<typeof createRiotService>;
