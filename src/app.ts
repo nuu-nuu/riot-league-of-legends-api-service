@@ -98,7 +98,7 @@ export function createApp() {
         const champId = await riotService!.getChampionIdByName(championName);
 
         if (!champId) {
-          return c.json({ ok: false, error: "Champion name not found" }, 400);
+          return c.json({ ok: false, error: "Champion name not found" }, 404);
         }
 
         masteryData = await riotService!.getMasteryByChampion(champId);
