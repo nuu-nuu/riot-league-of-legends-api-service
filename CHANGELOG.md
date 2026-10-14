@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-10-14
+
+### Added
+- Expanded Champion Mastery support with dynamic `count` queries for top-X champion lookups.
+- Added total mastery points support via the `total` query parameter.
+- Added champion lookups by name using the DDragon metadata service.
+- Implemented DDragon version and champion data access for Riot champion identity resolution.
+
+### Changed
+- Updated the Mastery endpoint behavior to support the full Champion Mastery v4 feature set.
+- Clarified the public API contract and documentation for the `mastery` route.
+- Bumped the package version to `2.1.0`.
+
+### Breaking
+- The mastery route now interprets optional query parameters with precedence: `championName` > `total` > `count` > default full list.
+
+---
+
 ## [2.0.0] - 2026-10-12
 
 ### Added
