@@ -1,3 +1,0 @@
-### GET Champion Mastery with name
-
-GET http://localhost:4322/api/v2/riot/mastery?championName=rell&gameName=nuunuu&tag=femmy&region=euw1

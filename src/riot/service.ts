@@ -114,6 +114,7 @@ export function createRiotService(tag: string, region: string, gameName: string)
   
     let championId : number = 0;
 
+    // not an array -> object!!
     for(const champion of champions) {
       if(champion.name.toLowerCase() === championName.toLowerCase()) {
         championId = champion.key;
