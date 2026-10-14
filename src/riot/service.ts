@@ -109,23 +109,19 @@ export function createRiotService(tag: string, region: string, gameName: string)
     return total;
   }
 
-  async function getChampionIdByName(championName: string) {
-    // implement cache control
-    const champions : ChampionData = await ddragonService.getChampionData();
-  
-    let championId : number = 0;
+  async function getChampionIdByName(championName: string): Promise<number> {
+    const champions: ChampionData = await ddragonService.getChampionData();
+    const normalizedName = championName.trim().toLowerCase();
+    const championEntries = Object.values(champions.data ?? {}) as Champion[];
 
-    for(const champion in champions.data) {
-      if(champions.data[champion].id.toLowerCase() === championName.toLowerCase()) {
-        console.log(champion)
-        championId = champions.data[champion].key;
-        break;
+    for (const champion of championEntries) {
+      const candidateName = String(champion?.id ?? champion?.name ?? "").toLowerCase();
+      if (candidateName === normalizedName) {
+        return Number(champion.key ?? 0);
       }
     }
 
-    console.log(championId);
-
-    return championId;
+    return 0;
   }
 
   async function getLive(): Promise<LiveGameStatus> {
