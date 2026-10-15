@@ -8,17 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.1.0] - 2026-10-14
 
 ### Added
+
 - Expanded Champion Mastery support with dynamic `count` queries for top-X champion lookups.
 - Added total mastery points support via the `total` query parameter.
 - Added champion lookups by name using the DDragon metadata service.
 - Implemented DDragon version and champion data access for Riot champion identity resolution.
 
 ### Changed
+
 - Updated the Mastery endpoint behavior to support the full Champion Mastery v4 feature set.
 - Clarified the public API contract and documentation for the `mastery` route.
 - Bumped the package version to `2.1.0`.
 
 ### Breaking
+
 - The mastery route now interprets optional query parameters with precedence: `championName` > `total` > `count` > default full list.
 
 ---
@@ -26,15 +29,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.0] - 2026-10-12
 
 ### Added
+
 - New versioned API route at `/api/v2/riot` with improved endpoint design.
 - Enhanced request validation and error handling.
 
 ### Changed
+
 - Migrated all endpoints from `/api/v1/riot` to `/api/v2/riot`.
 - Updated the package version to `2.0.0`.
 - Improved internal API consistency and response schemas.
 
 ### Deprecated
+
 - `/api/v1/riot` routes are no longer recommended; clients should migrate to `/api/v2/riot`.
 
 ---
@@ -42,6 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-10-10
 
 ### Added
+
 - Initial stable public release of the Riot League of Legends API service.
 - Versioned API route at `/api/v1/riot`.
 - Environment-based configuration for `RIOT_API_KEY`, `PORT`, and `ALLOWED_ORIGIN`.
@@ -52,12 +59,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Public security policy and improved template documentation for contributor workflows.
 
 ### Changed
+
 - Updated the package version to `1.0.0`.
 - Standardized the public API to use the versioned path `/api/v1/riot`.
 - Kept `/api/riot` as a compatibility redirect to guide older clients to the v1 route.
 - Reworked README and issue templates to match the actual implementation and public usage model.
 
 ### Security
+
 - Added explicit security guidance for self-hosted deployments and private vulnerability reporting.
 
 ---
@@ -65,6 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
+
 - Add additional API versioning policy documentation for future breaking changes.
 - Expand endpoint coverage and response schema validation.
 - Consider request rate limiting and operational monitoring improvements.
