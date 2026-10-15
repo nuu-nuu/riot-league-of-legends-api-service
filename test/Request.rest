@@ -1,3 +1,0 @@
-### GET PUUID
-
-GET http://localhost:4322/api/riot?region=euw1&gameName=NuuNuu&tag=FEMMY
