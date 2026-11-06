@@ -19,7 +19,8 @@ import type {
   LiveGameStatus,
   RecentMatchSummary,
   Champion,
-  ChampionData
+  ChampionData,
+  ChampionRotation
 } from "../types.js";
 
 export function createRiotService(tag: string, region: string, gameName: string) {
@@ -166,6 +167,14 @@ export function createRiotService(tag: string, region: string, gameName: string)
       win: me.win,
       mode: match.info.gameMode,
     };
+  }
+
+  async function getChampionRotation(): Promise<ChampionRotation> {
+    const data = await riot<ChampionRotation>(
+      `https://${cluster}.api.riotgames.com/lol/platform/v3/champion-rotations`,
+      RIOT_KEY,
+    );
+    return data;
   }
 
   return {

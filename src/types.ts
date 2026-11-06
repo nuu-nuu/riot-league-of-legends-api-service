@@ -78,3 +78,8 @@ export interface Champion {
   id: string;
   key: number;
 }
+
+export interface ChampionRotation {
+  newplayer: Champion[];
+  sr: Champion[];
+}
